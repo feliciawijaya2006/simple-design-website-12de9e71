@@ -5,5 +5,6 @@
 - [x] Tambahkan pemilihan tanggal dan jumlah porsi untuk Kuota Fleksibel di Portal Saya.
 - [x] Tambahkan editor menu Senin–Jumat khusus admin dengan sumber menu yang sama untuk pelanggan.
 - [x] Uji aturan kuota dan batas 20:00 H-1; periksa formulir masuk dan larangan akses admin sebelum login.
+- [x] Semua pilihan wilayah hanya 5 wilayah Jakarta (Pusat, Utara, Barat, Selatan, Timur); data lama "Kota …" dipetakan dan dirapikan.
 - [ ] Uji pemesanan fleksibel dan penyimpanan menu dengan akun nyata — terhambat layanan akun/data yang tidak tersedia.
 - [ ] Aktifkan admin untuk rantangku@gmail.com setelah akun terverifikasi tersedia — terhambat layanan akun/data yang tidak tersedia.
