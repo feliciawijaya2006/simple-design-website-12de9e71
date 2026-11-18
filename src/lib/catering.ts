@@ -5,7 +5,7 @@ export const PACKAGES: Record<PackageId, { name: string; pax: number; price: num
   fleksibel: { name: "Kuota Fleksibel", pax: 10, price: 260000, desc: "10 porsi, pilih tanggal dan jumlah sesuai kebutuhan" },
 };
 
-export const AREAS = ["Kota Utara", "Kota Selatan", "Kota Timur", "Kota Barat"];
+export const AREAS = ["Jakarta Pusat", "Jakarta Utara", "Jakarta Barat", "Jakarta Selatan", "Jakarta Timur"];
 export const ADMIN_WA = "6281234567890";
 export const DAY_NAMES = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 export const LOW_QUOTA = 2;
