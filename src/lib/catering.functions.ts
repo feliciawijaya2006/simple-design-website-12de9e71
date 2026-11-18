@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database, Tables } from "@/integrations/supabase/types";
-import { PACKAGES, type MealBooking, type Menu, type PackageId, type Profile, type Status, type Subscription } from "@/lib/catering";
+import { PACKAGES, normalizeArea, type MealBooking, type Menu, type PackageId, type Profile, type Status, type Subscription } from "@/lib/catering";
 
 type AuthContext = { supabase: any; userId: string };
 
@@ -28,7 +28,7 @@ function mapSubscriptions(
       name: profile?.full_name ?? "Pelanggan",
       phone: profile?.phone ?? "",
       address: profile?.address ?? "",
-      area: profile?.area ?? "",
+      area: normalizeArea(profile?.area),
       notes: profile?.notes ?? "",
       pkg: s.pkg as PackageId,
       total: s.total_portions,
@@ -99,7 +99,7 @@ export const getPortalData = createServerFn({ method: "GET" })
     if (subError) throw new Error(subError.message);
     const subscriptions = (rows ?? []) as Tables<"subscriptions">[];
     const relations = await loadRelations(context.supabase, subscriptions.map((s) => s.id));
-    const mappedProfile: Profile = { id: profile.id, name: profile.full_name, phone: profile.phone, address: profile.address, area: profile.area, notes: profile.notes };
+    const mappedProfile: Profile = { id: profile.id, name: profile.full_name, phone: profile.phone, address: profile.address, area: normalizeArea(profile.area), notes: profile.notes };
     return { profile: mappedProfile, subscriptions: mapSubscriptions(subscriptions, [profile], relations.skips, relations.bookings, relations.deliveries) };
   });
 
@@ -124,7 +124,7 @@ export const createOrder = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const p = PACKAGES[data.pkg];
     if (!p || !/^\d{4}-\d{2}-\d{2}$/.test(data.start) || !data.name.trim() || !data.phone.trim() || !data.address.trim()) throw new Error("Data pesanan belum lengkap.");
-    const { error: profileError } = await context.supabase.from("profiles").update({ full_name: data.name.trim(), phone: data.phone.trim(), address: data.address.trim(), area: data.area, notes: data.notes.trim(), updated_at: new Date().toISOString() }).eq("id", context.userId);
+    const { error: profileError } = await context.supabase.from("profiles").update({ full_name: data.name.trim(), phone: data.phone.trim(), address: data.address.trim(), area: normalizeArea(data.area), notes: data.notes.trim(), updated_at: new Date().toISOString() }).eq("id", context.userId);
     if (profileError) throw new Error(profileError.message);
     const { data: order, error } = await context.supabase.from("subscriptions").insert({ user_id: context.userId, pkg: data.pkg, total_portions: p.pax, remaining_portions: p.pax, price: p.price, start_date: data.start }).select("id, order_code").single();
     if (error) throw new Error(error.message);

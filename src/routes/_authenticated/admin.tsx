@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { DAY_NAMES, fmtDate, isLowQuota, needsMeal, PACKAGES, AREAS, reservedPortions, rupiah, waInvoiceLink, type Menu, type Subscription } from "@/lib/catering";
+import { DAY_NAMES, fmtDate, isLowQuota, needsMeal, PACKAGES, AREAS, normalizeArea, reservedPortions, rupiah, waInvoiceLink, type Menu, type Subscription } from "@/lib/catering";
 import { deleteSubscription, getCurrentRole, markDelivered, updateMenu, verifySubscription } from "@/lib/catering.functions";
 import { adminQueryOptions, menuQueryOptions } from "@/lib/queries";
 
@@ -69,7 +69,7 @@ function Admin() {
 
       {tab === "Dapur" && <div className="card-box"><h2 className="text-2xl font-bold">Checklist dapur</h2><p className="text-muted-foreground">Menu: <b className="text-foreground">{menu?.title ?? "Libur (akhir pekan)"}</b></p><p className="mt-4 font-display text-6xl font-bold text-primary">{totalPortions} <span className="text-2xl text-foreground">porsi</span></p><p className="mt-2 text-sm text-muted-foreground">Paket harian masuk otomatis; Kuota Fleksibel hanya masuk pada tanggal yang dipilih pelanggan.</p><h3 className="mt-6 font-semibold">Catatan khusus</h3><ul className="mt-2 space-y-1 text-sm">{kitchen.filter((r) => r.s.notes).map((r) => <li key={r.s.id}>⚠ {r.s.name}: {r.s.notes}</li>)}{kitchen.every((r) => !r.s.notes) && <li className="text-muted-foreground">Tidak ada.</li>}</ul><button className="btn-outline mt-6" onClick={() => window.print()}>🖨 Cetak rekap</button></div>}
 
-      {tab === "Kurir" && <div className="grid gap-4 md:grid-cols-2">{AREAS.map((area) => { const list = kitchen.filter((r) => r.s.area === area); return <div key={area} className="card-box"><h2 className="text-xl font-bold">{area} <span className="text-sm font-normal text-muted-foreground">({list.reduce((n, r) => n + r.portions, 0)} porsi)</span></h2><ul className="mt-3 space-y-2">{list.length === 0 && <li className="text-sm text-muted-foreground">Tidak ada pengiriman.</li>}{list.map((row, i) => <CourierRow key={row.s.id} row={row} i={i} disabled={busy === row.s.id} onDone={() => run(row.s.id, () => deliveredFn({ data: { subscriptionId: row.s.id, date } }))} />)}</ul></div>; })}</div>}
+      {tab === "Kurir" && <div className="grid gap-4 md:grid-cols-2">{AREAS.map((area) => { const list = kitchen.filter((r) => normalizeArea(r.s.area) === area); return <div key={area} className="card-box"><h2 className="text-xl font-bold">{area} <span className="text-sm font-normal text-muted-foreground">({list.reduce((n, r) => n + r.portions, 0)} porsi)</span></h2><ul className="mt-3 space-y-2">{list.length === 0 && <li className="text-sm text-muted-foreground">Tidak ada pengiriman.</li>}{list.map((row, i) => <CourierRow key={row.s.id} row={row} i={i} disabled={busy === row.s.id} onDone={() => run(row.s.id, () => deliveredFn({ data: { subscriptionId: row.s.id, date } }))} />)}</ul></div>; })}</div>}
 
       {tab === "Menu" && <MenuEditor menus={menus} />}
 

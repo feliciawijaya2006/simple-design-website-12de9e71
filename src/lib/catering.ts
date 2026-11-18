@@ -6,6 +6,25 @@ export const PACKAGES: Record<PackageId, { name: string; pax: number; price: num
 };
 
 export const AREAS = ["Jakarta Pusat", "Jakarta Utara", "Jakarta Barat", "Jakarta Selatan", "Jakarta Timur"];
+
+/** Nilai lama dari daftar wilayah sebelumnya, dipetakan ke wilayah Jakarta. */
+const AREA_ALIASES: Record<string, string> = {
+  "Kota Pusat": "Jakarta Pusat",
+  "Kota Utara": "Jakarta Utara",
+  "Kota Barat": "Jakarta Barat",
+  "Kota Selatan": "Jakarta Selatan",
+  "Kota Timur": "Jakarta Timur",
+};
+
+/** Pastikan wilayah selalu salah satu wilayah Jakarta; nilai lama atau tak dikenal dipetakan ke pilihan yang sah. */
+export function normalizeArea(value: string | null | undefined): string {
+  const raw = (value ?? "").trim();
+  if (AREAS.includes(raw)) return raw;
+  const alias = AREA_ALIASES[raw];
+  if (alias && AREAS.includes(alias)) return alias;
+  return AREAS[0] ?? "";
+}
+
 export const ADMIN_WA = "6281234567890";
 export const DAY_NAMES = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 export const LOW_QUOTA = 2;

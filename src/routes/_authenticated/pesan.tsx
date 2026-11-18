@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { AREAS, PACKAGES, ADMIN_WA, rupiah, fmtDate, addDays, type PackageId } from "@/lib/catering";
+import { AREAS, PACKAGES, ADMIN_WA, rupiah, fmtDate, addDays, normalizeArea, type PackageId } from "@/lib/catering";
 import { createOrder } from "@/lib/catering.functions";
 import { portalQueryOptions } from "@/lib/queries";
 
@@ -25,7 +25,7 @@ function OrderPage() {
   const queryClient = useQueryClient();
   const submitOrder = useServerFn(createOrder);
   const [pkg, setPkg] = useState<PackageId>(search.paket ?? "20hari");
-  const [form, setForm] = useState({ name: data.profile.name, phone: data.profile.phone, address: data.profile.address, area: data.profile.area || AREAS[0] || "", notes: data.profile.notes, start: fmtDate(addDays(new Date(), 1)) });
+  const [form, setForm] = useState({ name: data.profile.name, phone: data.profile.phone, address: data.profile.address, area: normalizeArea(data.profile.area), notes: data.profile.notes, start: fmtDate(addDays(new Date(), 1)) });
   const [done, setDone] = useState<{ code: string; price: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { canSkip, flexibleBookingError, isLowQuota, needsMeal, reservedPortions, type Subscription } from "./catering";
+import { canSkip, flexibleBookingError, isLowQuota, needsMeal, normalizeArea, reservedPortions, AREAS, type Subscription } from "./catering";
 
 const base: Subscription = {
   id: "x", code: "RK-X", userId: "user-1", name: "A", phone: "08", address: "", area: "", notes: "",
@@ -28,5 +28,19 @@ describe("aturan katering", () => {
   it("peringatan tagihan muncul saat sisa <= 2", () => {
     expect(isLowQuota({ ...base, remaining: 2 })).toBe(true);
     expect(isLowQuota({ ...base, remaining: 3 })).toBe(false);
+  });
+  it("daftar wilayah hanya berisi wilayah Jakarta", () => {
+    expect(AREAS).toEqual(["Jakarta Pusat", "Jakarta Utara", "Jakarta Barat", "Jakarta Selatan", "Jakarta Timur"]);
+    expect(AREAS.every((a) => a.startsWith("Jakarta"))).toBe(true);
+  });
+  it("wilayah lama dipetakan ke wilayah Jakarta", () => {
+    expect(normalizeArea("Kota Selatan")).toBe("Jakarta Selatan");
+    expect(normalizeArea("Kota Utara")).toBe("Jakarta Utara");
+    expect(normalizeArea("Jakarta Timur")).toBe("Jakarta Timur");
+  });
+  it("wilayah kosong atau tak dikenal jatuh ke pilihan Jakarta pertama", () => {
+    expect(normalizeArea("")).toBe("Jakarta Pusat");
+    expect(normalizeArea("Bekasi")).toBe("Jakarta Pusat");
+    expect(normalizeArea(null)).toBe("Jakarta Pusat");
   });
 });
