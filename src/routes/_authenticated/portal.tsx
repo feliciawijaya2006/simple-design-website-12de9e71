@@ -77,7 +77,10 @@ function SubscriptionCard({ s, days, now, busy, onSkip, onBook, onCancel }: {
         {s.pkg === "fleksibel" && <p className="mt-2 text-sm text-muted-foreground">{reserved} porsi sudah dijadwalkan. Kuota berkurang saat dijadwalkan dan kembali jika dibatalkan sebelum batas waktu.</p>}
       </div>
       {isLowQuota(s) && <p className="mt-3 rounded-lg bg-warning-soft p-3 text-sm text-warning-foreground">Kuota tersedia hampir habis. <a className="font-semibold underline" target="_blank" rel="noreferrer" href={`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(`Halo, saya ${s.name} (${s.code}) ingin perpanjang paket.`)}`}>Perpanjang via WA</a></p>}
-      {s.status === "menunggu" && <p className="mt-3 rounded-lg bg-muted p-3 text-sm">Silakan transfer {rupiah(s.price)} ke BCA 1234567890 a.n. RantangKu lalu kirim bukti via WA.</p>}
+      {s.status === "menunggu" && <div className="mt-3 rounded-lg bg-muted p-3 text-sm">
+        <p>Silakan transfer {rupiah(s.price)} ke BCA <b>1234567890</b> a.n. RantangKu, atau scan QRIS saat konfirmasi WA. Paket aktif setelah admin memverifikasi pembayaran.</p>
+        <a className="btn-primary mt-3 inline-block" target="_blank" rel="noreferrer" href={`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(`Halo RantangKu, saya ${s.name} sudah memesan ${PACKAGES[s.pkg].name} (kode ${s.code}). Berikut bukti transfer saya.`)}`}>Kirim bukti bayar via WA</a>
+      </div>}
     </div>
 
     {s.status === "aktif" && s.pkg === "fleksibel" && <div className="card-box">
