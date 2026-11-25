@@ -8,4 +8,4 @@
 - [x] Semua pilihan wilayah hanya 5 wilayah Jakarta (Pusat, Utara, Barat, Selatan, Timur); data lama "Kota …" dipetakan dan dirapikan.
 - [x] Tambahkan tombol kirim bukti bayar via WA di Portal Saya untuk pesanan menunggu pembayaran.
 - [ ] Uji pemesanan fleksibel dan penyimpanan menu dengan akun nyata — terhambat layanan akun/data yang tidak tersedia.
-- [ ] Aktifkan admin — menunggu pengguna memilih akun (rantangku@gmail.com belum terdaftar; fel@gmail.com / anthonywijaya61@gmail.com sudah terdaftar).
+- [x] Aktifkan akun admin `rantangku@gmail.com` dan beri hak akses admin.
