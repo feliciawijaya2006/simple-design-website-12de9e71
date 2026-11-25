@@ -110,6 +110,51 @@ export type Database = {
           },
         ]
       }
+      menu_ratings: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          menu_day: number
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string
+          created_at?: string
+          id?: string
+          menu_day: number
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          menu_day?: number
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_ratings_menu_day_fkey"
+            columns: ["menu_day"]
+            isOneToOne: false
+            referencedRelation: "weekly_menus"
+            referencedColumns: ["day"]
+          },
+          {
+            foreignKeyName: "menu_ratings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address: string

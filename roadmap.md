@@ -9,3 +9,8 @@
 - [x] Tambahkan tombol kirim bukti bayar via WA di Portal Saya untuk pesanan menunggu pembayaran.
 - [ ] Uji pemesanan fleksibel dan penyimpanan menu dengan akun nyata — terhambat layanan akun/data yang tidak tersedia.
 - [x] Aktifkan akun admin `rantangku@gmail.com` dan beri hak akses admin.
+- [ ] Peningkatan Tugas Akhir (gaya Modern & Profesional):
+  - [ ] Foto hidangan Senin–Jumat + perombakan visual Beranda (testimoni, FAQ, jangkauan Jakarta, tata letak modern).
+  - [ ] Rating menu (database + RLS + UI) dan filter alergen/kalori di halaman Menu Mingguan.
+  - [ ] Fitur pelanggan di Portal Saya: edit profil, riwayat pengiriman lengkap, dan nota pesanan cetak.
+  - [ ] Laporan & grafik analitik di Dashboard Admin (pendapatan, tren porsi harian, ringkasan performa).

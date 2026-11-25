@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database, Tables } from "@/integrations/supabase/types";
-import { PACKAGES, normalizeArea, type MealBooking, type Menu, type PackageId, type Profile, type Status, type Subscription } from "@/lib/catering";
+import { PACKAGES, normalizeArea, type MealBooking, type Menu, type MenuRating, type PackageId, type Profile, type Status, type Subscription } from "@/lib/catering";
 
 type AuthContext = { supabase: any; userId: string };
 
@@ -195,6 +195,50 @@ export const updateMenu = createServerFn({ method: "POST" })
     await requireAdmin(context);
     if (data.day < 1 || data.day > 5 || !data.title.trim() || data.kcal < 0) throw new Error("Menu belum valid.");
     const { error } = await context.supabase.from("weekly_menus").update({ title: data.title.trim(), description: data.desc.trim(), category: data.category.trim(), kcal: data.kcal, allergens: data.allergens, updated_at: new Date().toISOString() }).eq("day", data.day);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const getMenuRatings = createServerFn({ method: "GET" }).handler(async (): Promise<MenuRating[]> => {
+  const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+  const supabase = createClient<Database>(process.env["SUPABASE_URL"]!, key, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+    global: { fetch: (input, init) => {
+      const headers = new Headers(init?.headers);
+      if (key.startsWith("sb_") && headers.get("Authorization") === `Bearer ${key}`) headers.delete("Authorization");
+      headers.set("apikey", key);
+      return fetch(input, { ...init, headers });
+    } },
+  });
+  const { data, error } = await supabase.from("menu_ratings").select("id, user_id, menu_day, rating, comment, created_at").order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => ({ id: r.id, userId: r.user_id, day: r.menu_day, rating: r.rating, comment: r.comment, createdAt: r.created_at }));
+});
+
+export const rateMenu = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { day: number; rating: number; comment: string }) => data)
+  .handler(async ({ data, context }) => {
+    if (!Number.isInteger(data.day) || data.day < 1 || data.day > 5) throw new Error("Hari menu tidak valid.");
+    if (!Number.isInteger(data.rating) || data.rating < 1 || data.rating > 5) throw new Error("Rating harus antara 1 sampai 5 bintang.");
+    const comment = data.comment.trim().slice(0, 240);
+    const { error } = await context.supabase.from("menu_ratings").upsert(
+      { user_id: context.userId, menu_day: data.day, rating: data.rating, comment, updated_at: new Date().toISOString() },
+      { onConflict: "user_id,menu_day" },
+    );
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const updateProfile = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { name: string; phone: string; address: string; area: string; notes: string }) => data)
+  .handler(async ({ data, context }) => {
+    if (!data.name.trim() || !data.phone.trim() || !data.address.trim()) throw new Error("Nama, nomor WhatsApp, dan alamat wajib diisi.");
+    const { error } = await context.supabase
+      .from("profiles")
+      .update({ full_name: data.name.trim(), phone: data.phone.trim(), address: data.address.trim(), area: normalizeArea(data.area), notes: data.notes.trim(), updated_at: new Date().toISOString() })
+      .eq("id", context.userId);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

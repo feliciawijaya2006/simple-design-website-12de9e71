@@ -8,6 +8,13 @@
       "when": 1793948498864,
       "tag": "0000_customer_admin_flexible_booking_menu",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795604981182,
+      "tag": "0001_create_menu_ratings",
+      "breakpoints": true
     }
   ]
 }

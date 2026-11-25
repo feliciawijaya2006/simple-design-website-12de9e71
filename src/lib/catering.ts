@@ -31,6 +31,8 @@ export const LOW_QUOTA = 2;
 export const SKIP_DEADLINE_HOUR = 20;
 
 export type Menu = { day: number; title: string; desc: string; category: string; kcal: number; allergens: string[] };
+export type MenuRating = { id: string; userId: string; day: number; rating: number; comment: string; createdAt: string };
+export type MenuRatingSummary = { day: number; avg: number; count: number };
 export type Status = "menunggu" | "aktif" | "selesai";
 export type BookingStatus = "terjadwal" | "terkirim" | "batal";
 export type MealBooking = { id: string; date: string; portions: number; status: BookingStatus };
@@ -100,4 +102,69 @@ export function waInvoiceLink(s: Subscription) {
   const p = PACKAGES[s.pkg];
   const msg = `Halo ${s.name}, sisa porsi RantangKu Anda tinggal ${s.remaining}. Yuk perpanjang ${p.name} (${rupiah(p.price)}).\nTransfer BCA 1234567890 a.n. RantangKu atau QRIS. Kirim bukti bayar ke nomor ini ya. Terima kasih!`;
   return `https://wa.me/${normPhone(s.phone)}?text=${encodeURIComponent(msg)}`;
+}
+
+/** Saring menu berdasarkan kategori, alergen yang dihindari, dan batas kalori. */
+export function filterMenus(
+  menus: Menu[],
+  opts: { category?: string; excludedAllergens?: string[]; maxKcal?: number | null },
+): Menu[] {
+  const excluded = (opts.excludedAllergens ?? []).map((a) => a.toLowerCase());
+  return menus.filter((m) => {
+    if (opts.category && opts.category !== "Semua" && m.category !== opts.category) return false;
+    if (opts.maxKcal != null && m.kcal > opts.maxKcal) return false;
+    if (excluded.length > 0 && m.allergens.some((a) => excluded.includes(a.toLowerCase()))) return false;
+    return true;
+  });
+}
+
+/** Ringkasan rata-rata rating per hari menu. */
+export function summarizeRatings(ratings: MenuRating[]): Record<number, MenuRatingSummary> {
+  const map: Record<number, { sum: number; count: number }> = {};
+  for (const r of ratings) {
+    const cur = map[r.day] ?? { sum: 0, count: 0 };
+    cur.sum += r.rating;
+    cur.count += 1;
+    map[r.day] = cur;
+  }
+  const out: Record<number, MenuRatingSummary> = {};
+  for (const [dayStr, v] of Object.entries(map)) {
+    const day = Number(dayStr);
+    out[day] = { day, avg: Math.round((v.sum / v.count) * 10) / 10, count: v.count };
+  }
+  return out;
+}
+
+/** Ringkasan analitik operasional dan pendapatan untuk Dashboard Admin. */
+export function computeAdminAnalytics(subs: Subscription[], ratings: MenuRating[]) {
+  const paidSubs = subs.filter((s) => s.paid || s.status === "aktif" || s.status === "selesai");
+  const pendingSubs = subs.filter((s) => s.status === "menunggu");
+  const activeSubs = subs.filter((s) => s.status === "aktif");
+  const verifiedRevenue = paidSubs.reduce((sum, s) => sum + s.price, 0);
+  const pendingRevenue = pendingSubs.reduce((sum, s) => sum + s.price, 0);
+  const totalDeliveredPortions = subs.reduce((sum, s) => sum + s.delivered.reduce((a, d) => a + d.portions, 0), 0);
+
+  const byPackage = (Object.keys(PACKAGES) as PackageId[]).map((pkg) => {
+    const matching = paidSubs.filter((s) => s.pkg === pkg);
+    return { pkg, name: PACKAGES[pkg].name, orders: matching.length, revenue: matching.reduce((sum, s) => sum + s.price, 0) };
+  });
+
+  const byArea = AREAS.map((area) => {
+    const matching = subs.filter((s) => normalizeArea(s.area) === area);
+    const portions = matching.reduce((sum, s) => sum + s.delivered.reduce((a, d) => a + d.portions, 0), 0);
+    return { area: area.replace("Jakarta ", "Jak"), fullArea: area, orders: matching.length, portions };
+  });
+
+  const dayTotals = new Map<string, number>();
+  for (const s of subs) {
+    for (const d of s.delivered) dayTotals.set(d.date, (dayTotals.get(d.date) ?? 0) + d.portions);
+  }
+  const dailyDeliveries = [...dayTotals.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-10)
+    .map(([date, portions]) => ({ date, label: date.slice(5), portions }));
+
+  const avgRating = ratings.length > 0 ? Math.round((ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length) * 10) / 10 : 0;
+
+  return { verifiedRevenue, pendingRevenue, activeCount: activeSubs.length, totalOrders: subs.length, totalDeliveredPortions, avgRating, totalRatings: ratings.length, byPackage, byArea, dailyDeliveries };
 }

@@ -19,7 +19,7 @@ import { LogOut, ShieldCheck } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { ADMIN_WA } from "../lib/catering";
+import { ADMIN_WA, AREAS } from "../lib/catering";
 
 function SiteHeader({ user, admin, onSignOut, signingOut }: { user: User | null; admin: boolean; onSignOut: () => Promise<void>; signingOut: boolean }) {
   const links = admin ? [
@@ -191,10 +191,31 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <SiteHeader user={user} admin={admin} onSignOut={signOut} signingOut={signingOut} />
       <main className="min-h-[70vh]"><Outlet /></main>
-      <footer className="mt-16 border-t py-8 text-center text-sm text-muted-foreground">
-        © 2026 RantangKu · Masakan rumahan, diantar tiap hari
+      <footer className="mt-20 border-t bg-card">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-4">
+          <div className="md:col-span-2">
+            <p className="font-display text-2xl font-bold text-primary">RantangKu</p>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">Katering rantangan rumahan untuk pekerja dan keluarga di Jakarta. Menu berganti Senin–Jumat, transparan kalori & alergen, serta jadwal libur atau kuota fleksibel langsung dari akun Anda.</p>
+          </div>
+          <div>
+            <p className="text-sm font-semibold">Layanan</p>
+            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <li><Link to="/" className="hover:text-primary">Beranda</Link></li>
+              <li><Link to="/menu" className="hover:text-primary">Menu Mingguan</Link></li>
+              <li><Link to="/pesan" className="hover:text-primary">Pesan Langganan</Link></li>
+              <li><Link to="/portal" className="hover:text-primary">Portal Pelanggan</Link></li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-sm font-semibold">Pengantaran Jakarta</p>
+            <p className="mt-3 text-sm text-muted-foreground">{AREAS.join(" · ")}</p>
+            <p className="mt-2 text-xs text-muted-foreground">Senin–Jumat · 10.30–12.00 WIB</p>
+            <p className="mt-1 text-xs text-muted-foreground">Batas ubah jadwal: 20.00 WIB (H-1)</p>
+          </div>
+        </div>
+        <div className="border-t py-4 text-center text-xs text-muted-foreground">© 2026 RantangKu · Katering Rantangan Harian Jakarta</div>
       </footer>
-      {!admin && <a href={`https://wa.me/${ADMIN_WA}`} target="_blank" rel="noreferrer" className="btn-primary fixed bottom-5 right-5 z-50 shadow-lg">💬 Tanya via WA</a>}
+      {!admin && <a href={`https://wa.me/${ADMIN_WA}`} target="_blank" rel="noreferrer" className="btn-primary no-print fixed bottom-5 right-5 z-50 shadow-lg">Tanya via WA</a>}
     </QueryClientProvider>
   );
 }
